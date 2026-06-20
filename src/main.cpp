@@ -1,4 +1,5 @@
 #include <Arduino.h>
+#include <WiFi.h> 
 #include "config.h"
 #include "wifi_manager.h"
 #include "mqtt_manager.h"
@@ -17,9 +18,21 @@ void setup() {
 void loop() {
   mqttLoop();
 
-  // Alle 5 Sekunden Status senden
   if (millis() - lastMsg > 5000) {
     lastMsg = millis();
+
+    // Status senden
     mqttSend(TOPIC_STATUS, "ESP32 laeuft!");
+
+    // IP senden
+    mqttSend(TOPIC_IP, WiFi.localIP().toString().c_str());
+
+    // WiFi Signal senden
+    String rssi = String(WiFi.RSSI()) + " dBm";
+    mqttSend(TOPIC_RSSI, rssi.c_str());
+
+    // Uptime senden
+    String uptime = String(millis() / 1000) + " Sekunden";
+    mqttSend(TOPIC_UPTIME, uptime.c_str());
   }
 }

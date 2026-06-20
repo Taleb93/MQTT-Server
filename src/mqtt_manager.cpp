@@ -44,8 +44,15 @@ void connectMQTT() {
 
     if (client.connect(MQTT_CLIENT_ID, MQTT_USER, MQTT_PASSWORD)) {
       Serial.println("MQTT verbunden! ✅");
-      client.subscribe(TOPIC_COMMAND);
+      
+      // Alle Topics abonnieren
+      client.subscribe(TOPIC_PUMP_COMMAND);
+      Serial.println("Abonniert: pump/command ✅");
+
+      // Online Nachricht
       client.publish(TOPIC_STATUS, "ESP32 ist online!");
+      client.publish(TOPIC_IP, WiFi.localIP().toString().c_str());
+
     } else {
       Serial.print("Fehler: ");
       Serial.println(client.state());
