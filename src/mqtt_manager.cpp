@@ -1,6 +1,7 @@
 #include "mqtt_manager.h"
 #include "config.h"
 #include <Arduino.h>
+#include <WiFi.h>
 #include <WiFiClientSecure.h>
 #include <PubSubClient.h>
 
@@ -16,18 +17,43 @@ void callback(char* topic, byte* payload, unsigned int length) {
     message += (char)payload[i];
   }
 
-  Serial.print("Empfangen [");
-  Serial.print(topic);
-  Serial.print("]: ");
+  Serial.println("================================");
+  Serial.print("Topic:   ");
+  Serial.println(topic);
+  Serial.print("Nachricht: ");
   Serial.println(message);
+  Serial.println("================================");
 
-  if (message == "ON") {
-    Serial.println(">>> PUMPE AN!");
-    digitalWrite(RELAY_PIN, LOW);
+  // ============================================
+  // LED Steuerung
+  // ============================================
+  if (String(topic) == "home/led/command") {
+    if (message == "HIGH") {
+      digitalWrite(LED_PIN, HIGH);
+      Serial.println(">>> LED AN! 💡");
+      mqttSend("home/led/status", "LED ist AN");
+    }
+    if (message == "LOW") {
+      digitalWrite(LED_PIN, LOW);
+      Serial.println(">>> LED AUS!");
+      mqttSend("home/led/status", "LED ist AUS");
+    }
   }
-  if (message == "OFF") {
-    Serial.println(">>> PUMPE AUS!");
-    digitalWrite(RELAY_PIN, HIGH);
+
+  // ============================================
+  // Pumpe Steuerung
+  // ============================================
+  if (String(topic) == "home/pump/command") {
+    if (message == "ON") {
+      digitalWrite(RELAY_PIN, LOW);
+      Serial.println(">>> PUMPE AN! 💧");
+      mqttSend("home/pump/status", "Pumpe ist AN");
+    }
+    if (message == "OFF") {
+      digitalWrite(RELAY_PIN, HIGH);
+      Serial.println(">>> PUMPE AUS!");
+      mqttSend("home/pump/status", "Pumpe ist AUS");
+    }
   }
 }
 
@@ -44,14 +70,15 @@ void connectMQTT() {
 
     if (client.connect(MQTT_CLIENT_ID, MQTT_USER, MQTT_PASSWORD)) {
       Serial.println("MQTT verbunden! ✅");
-      
-      // Alle Topics abonnieren
-      client.subscribe(TOPIC_PUMP_COMMAND);
-      Serial.println("Abonniert: pump/command ✅");
+
+      // Topics abonnieren
+      client.subscribe("home/led/command");
+      client.subscribe("home/pump/command");
+      Serial.println("Abonniert: home/led/command ✅");
+      Serial.println("Abonniert: home/pump/command ✅");
 
       // Online Nachricht
       client.publish(TOPIC_STATUS, "ESP32 ist online!");
-      client.publish(TOPIC_IP, WiFi.localIP().toString().c_str());
 
     } else {
       Serial.print("Fehler: ");
