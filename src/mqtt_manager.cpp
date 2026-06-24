@@ -7,7 +7,9 @@
 
 WiFiClientSecure espClient;
 PubSubClient client(espClient);
-
+unsigned long previousMillis = 0;
+bool blinking = false;
+bool ledState = false;
 // ============================================
 // Nachricht empfangen
 // ============================================
@@ -28,16 +30,21 @@ void callback(char* topic, byte* payload, unsigned int length) {
   // LED Steuerung
   // ============================================
   if (String(topic) == "home/led/command") {
-    if (message == "HIGH") {
-      digitalWrite(LED_PIN, HIGH);
-      Serial.println(">>> LED AN! 💡");
-      mqttSend("home/led/status", "LED ist AN");
-    }
-    if (message == "LOW") {
-      digitalWrite(LED_PIN, LOW);
-      Serial.println(">>> LED AUS!");
-      mqttSend("home/led/status", "LED ist AUS");
-    }
+            if (message == "blink") {
+        blinking = true;
+        mqttSend("home/led/status", "LED ist Blinking");
+        }
+        if (message == "HIGH") {
+        blinking = false;  // ← Blink stoppen!
+        digitalWrite(LED_PIN, HIGH);
+        mqttSend("home/led/status", "LED ist AN");
+        }
+        if (message == "LOW") {
+        blinking = false;  // ← Blink stoppen!
+        digitalWrite(LED_PIN, LOW);
+        mqttSend("home/led/status", "LED ist AUS");
+        }
+
   }
 
   // ============================================
