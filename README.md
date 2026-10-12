@@ -3,7 +3,6 @@
 ![System Übersicht](fotos/foto.png)
 
 Ferngesteuerte Blumenbewässerung über MQTT und HiveMQ Cloud.  
-Steuerung von überall auf der Welt möglich (z.B. von Malta 🇲🇹 nach Deutschland 🇩🇪).
 
 ---
 
@@ -198,22 +197,6 @@ pio device monitor
 lib_deps =
     knolleary/PubSubClient @ ^2.8
     bblanchon/ArduinoJson @ ^6.21.3
-```
-
----
-
-## 🌍 System Übersicht
-
-```
-🇩🇪 Deutschland              🇲🇹 Malta
-─────────────                ──────────
-ESP32 + Sensor               Du (unterwegs)
-      │                            │
-      │ WiFi                       │ 4G/WiFi
-      ▼                            ▼
-   Router ──── Internet ──── HiveMQ Cloud
-                                   │
-                              EasyMQTT App
 ```
 
 ---
